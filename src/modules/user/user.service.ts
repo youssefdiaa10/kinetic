@@ -1,9 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable } from "@nestjs/common";
 
 @Injectable()
 export class UserService {
-
-    getUser() {
-        return "User module"
-    }
+  findAll() {
+    return "User module";
+  }
 }

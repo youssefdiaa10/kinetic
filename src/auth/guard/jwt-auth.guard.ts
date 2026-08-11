@@ -6,8 +6,13 @@ import {
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { Reflector } from "@nestjs/core";
-import jwt from "jsonwebtoken";
+import { Request } from "express";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { IS_PUBLIC_KEY } from "../decorators/public.decorator";
+
+interface AuthenticatedRequest extends Request {
+  user: JwtPayload;
+}
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -24,23 +29,41 @@ export class JwtAuthGuard implements CanActivate {
 
     if (isPublic) return true;
 
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const authHeader = request.headers.authorization;
 
     if (!authHeader) throw new UnauthorizedException("No token provided");
 
-    const token = authHeader.split(" ")[1];
+    const [type, token] = authHeader.split(" ");
+
+    if (type !== "Bearer" || !token) {
+      throw new UnauthorizedException("Invalid authorization header");
+    }
 
     try {
       const secretKey = this.configService.get<string>("SECRET_KEY");
-      const payload = jwt.verify(token, secretKey!);
+
+      if (!secretKey) {
+        throw new Error("SECRET_KEY is not configured");
+      }
+
+      const payload = jwt.verify(token, secretKey);
+
+      if (typeof payload === "string") {
+        throw new UnauthorizedException("Invalid token");
+      }
 
       request.user = payload;
 
       return true;
     } catch (error) {
-      if ((error as Error).name === "TokenExpiredError")
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+
+      if (error instanceof jwt.TokenExpiredError) {
         throw new UnauthorizedException("Token expired");
+      }
 
       throw new UnauthorizedException("Invalid token!");
     }
