@@ -1,13 +1,14 @@
-import { Controller, Get } from '@nestjs/common';
-import { TodosService } from './todos.service';
+import { Controller, Get, UseGuards } from "@nestjs/common";
+import { JwtAuthGuard } from "../../auth/guard/jwt-auth.guard";
+import { TodosService } from "./todos.service";
 
-@Controller('todos')
+@Controller("todos")
+@UseGuards(JwtAuthGuard)
 export class TodosController {
-    constructor(private readonly todosService: TodosService) { }
+  constructor(private readonly todosService: TodosService) {}
 
-    @Get()
-    getTodos() {
-        return this.todosService.getTodos()
-    }
-
+  @Get()
+  getTodos() {
+    return this.todosService.getTodos();
+  }
 }
