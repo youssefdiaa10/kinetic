@@ -1,10 +1,10 @@
 import { Body, Controller, Patch, Post, ValidationPipe } from "@nestjs/common";
 import { Public } from "../../auth/decorators/public.decorator";
 import {
-  RefreshDto,
-  SigninDto,
-  SignupDto,
-  VerifyDto,
+    RefreshDto,
+    SigninDto,
+    SignupDto,
+    VerifyDto,
 } from "../../dtos/auth/auth.dto";
 import { AuthService } from "./auth.service";
 
@@ -19,7 +19,7 @@ export class AuthController {
   }
 
   @Patch("/signin")
-  signin(@Body(ValidationPipe) signin: SigninDto) {
+  signin(@Body(ValidationPipe) signin: Omit<SigninDto, "username">) {
     return this.authService.signin(signin);
   }
 

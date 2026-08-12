@@ -10,12 +10,15 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { Repository } from "typeorm";
 import { SigninDto, SignupDto, VerifyDto } from "../../dtos/auth/auth.dto";
+import { RefreshToken } from "../../entities/refresh-token.entity";
 import { User } from "../../entities/user.entity";
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
+    @InjectRepository(RefreshToken)
+    private readonly refreshTokenRepository: Repository<RefreshToken>,
     private readonly configService: ConfigService,
   ) {}
 
@@ -47,7 +50,7 @@ export class AuthService {
     return response;
   }
 
-  async signin(signinDto: SigninDto) {
+  async signin(signinDto: Omit<SigninDto, "username">) {
     const { email, password } = signinDto;
 
     const user = await this.userRepository.findOne({
@@ -62,18 +65,48 @@ export class AuthService {
 
     const secretkey = this.configService.get<string>("SECRET_KEY");
 
+    //! 1. Create access token
     const accessToken = jwt.sign(
       {
         sub: user.id,
         email: user.email,
       },
       secretkey!,
-      { expiresIn: "15m" },
+      { expiresIn: "1h" },
     );
+
+    //! 2. Create empty RefreshToken record
+    const refreshTokenEntity = this.refreshTokenRepository.create({
+      token: "",
+      user,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    });
+
+    //! 3. Save it so TypeORM generates the UUID
+    await this.refreshTokenRepository.save(refreshTokenEntity);
+
+    //! 4. Create refresh JWT
+    const refreshToken = jwt.sign(
+      {
+        sub: user.id,
+        //! THIS is jti
+        jti: refreshTokenEntity.id,
+      },
+      secretkey!,
+      { expiresIn: "7d" },
+    );
+
+    //! 5. Hash refresh token
+    const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+
+    //! 6. Store hash
+    refreshTokenEntity.token = hashedRefreshToken;
+    await this.refreshTokenRepository.save(refreshTokenEntity);
 
     return {
       message: "Signed in successfully",
       accessToken,
+      refreshToken,
     };
   }
 
@@ -106,27 +139,41 @@ export class AuthService {
 
       const payload = jwt.verify(refreshToken, secretkey!) as {
         sub: string;
+        jti: string;
       };
 
-      const user = await this.userRepository.findOne({
+      const refreshTokenEntity = await this.refreshTokenRepository.findOne({
         where: {
-          id: payload.sub,
+          id: payload.jti,
+        },
+        relations: {
+          user: true,
         },
       });
 
-      if (!user || !user.refreshToken)
+      if (
+        !refreshTokenEntity ||
+        !refreshTokenEntity.token ||
+        refreshTokenEntity.revoked ||
+        refreshTokenEntity.user.id !== payload.sub ||
+        refreshTokenEntity.expiresAt < new Date()
+      ) {
         throw new ForbiddenException("Access denied");
+      }
 
-      const isMatch = await bcrypt.compare(refreshToken, user.refreshToken);
+      const isMatch = await bcrypt.compare(
+        refreshToken,
+        refreshTokenEntity.token,
+      );
       if (!isMatch) throw new ForbiddenException("Access denied");
 
       const newAccessToken = jwt.sign(
         {
-          sub: user.id,
-          email: user.id,
+          sub: refreshTokenEntity.user.id,
+          email: refreshTokenEntity.user.email,
         },
         secretkey!,
-        { expiresIn: "15m" },
+        { expiresIn: "1h" },
       );
 
       return {
