@@ -6,6 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { RefreshToken } from "./refresh-token.entity";
+import { Todos } from "./todos.entity";
 
 @Entity()
 export class User extends BaseEntity {
@@ -23,4 +24,7 @@ export class User extends BaseEntity {
 
   @OneToMany(() => RefreshToken, (token) => token.user)
   refreshTokens!: Array<RefreshToken>;
+
+  @OneToMany(() => Todos, (todo) => todo.user)
+  todos!: Array<Todos>;
 }

@@ -1,17 +1,26 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from "typeorm";
+import { User } from "./user.entity";
 
 @Entity()
-export class Todo {
-    @PrimaryGeneratedColumn("uuid")
-    id!: string;
+export class Todos extends BaseEntity {
+  @PrimaryGeneratedColumn("uuid")
+  id!: string;
 
-    @Column()
-    title!: string;
+  @Column()
+  title!: string;
 
-    @Column()
-    status!: "NEEDS_ACTION" | "COMPLETED"
+  @Column()
+  status!: "NEEDS_ACTION" | "COMPLETED";
 
-    @Column()
-    description!: string;
+  @Column()
+  description!: string;
 
+  @ManyToOne(() => User, (user) => user.todos, { onDelete: "CASCADE" })
+  user!: User;
 }

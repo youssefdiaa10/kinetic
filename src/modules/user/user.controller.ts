@@ -1,5 +1,12 @@
-import { Controller, Get, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  UseGuards,
+  ValidationPipe,
+} from "@nestjs/common";
 import { JwtAuthGuard } from "../../auth/guard/jwt-auth.guard";
+import { FindOneUserDto } from "../../dtos/user/user";
 import { UserService } from "./user.service";
 
 @Controller("user")
@@ -7,8 +14,13 @@ import { UserService } from "./user.service";
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Get()
+  @Get("/all")
   findAll() {
     return this.userService.findAll();
+  }
+
+  @Get("one")
+  findOne(@Body(ValidationPipe) findOneUserDto: FindOneUserDto) {
+    return this.userService.findOne(findOneUserDto);
   }
 }
