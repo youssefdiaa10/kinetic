@@ -50,7 +50,7 @@ export class AuthService {
     return response;
   }
 
-  async signin(signinDto: Omit<SigninDto, "username">) {
+  async signin(signinDto: SigninDto) {
     const { email, password } = signinDto;
 
     const user = await this.userRepository.findOne({
