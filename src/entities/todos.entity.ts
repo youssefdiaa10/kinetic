@@ -5,6 +5,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
+import { TodoPriority, TodoStatus } from "../enum/todos.enum";
 import { User } from "./user.entity";
 
 @Entity()
@@ -15,11 +16,22 @@ export class Todos extends BaseEntity {
   @Column()
   title!: string;
 
-  @Column()
-  status!: "NEEDS_ACTION" | "COMPLETED";
+  @Column({
+    type: "simple-enum",
+    enum: TodoStatus,
+    default: TodoStatus.NEEDS_ACTION,
+  })
+  status!: TodoStatus;
 
-  @Column()
-  description!: string;
+  @Column({
+    type: "simple-enum",
+    enum: TodoPriority,
+    default: TodoPriority.MEDIUM,
+  })
+  priority!: TodoPriority;
+
+  @Column({ nullable: true })
+  description?: string;
 
   @ManyToOne(() => User, (user) => user.todos, { onDelete: "CASCADE" })
   user!: User;
