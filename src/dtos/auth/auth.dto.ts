@@ -1,7 +1,11 @@
-import { BaseUserDto, Token } from "..";
+import { OmitType } from "@nestjs/mapped-types";
+import { BaseTokenDto, BaseUserDto } from "../index.dto";
 
-export class SigninDto extends BaseUserDto {}
-export class SignupDto extends BaseUserDto {}
+export class SigninDto extends OmitType(BaseUserDto, [
+  "username",
+  "id",
+] as const) {}
+export class SignupDto extends OmitType(BaseUserDto, ["id"] as const) {}
 
-export class VerifyDto extends Token {}
-export class RefreshDto extends Token {}
+export class VerifyDto extends BaseTokenDto {}
+export class RefreshDto extends BaseTokenDto {}
