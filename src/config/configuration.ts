@@ -1,19 +1,23 @@
-import { Todos } from "../entities/todos.entity";
-import { User } from "../entities/user.entity";
-
-const type: "better-sqlite3" | undefined = "better-sqlite3";
-
 export default () => ({
   app: {
-    port: process.env.PORT ?? 3000,
+    port: process.env.PORT || 3000,
   },
   database: {
     sqlite3: {
-      type,
-      database: "database/db.sqlite",
-      // entities: [join(__dirname, "../entities/**/*.entity{.ts,.js}")],
-      entities: [User, Todos],
-      synchronize: true, //!< ⚠️ true only in development
+      type: "better-sqlite3",
+      database: process.env.DB_PATH || "database/db.sqlite",
+      //! ⚠️ Automatically disables synchronize in production
+      synchronize: process.env.NODE_ENV !== "production",
+    },
+    postgres: {
+      type: "postgres" as const,
+      host: process.env.DB_HOST || "localhost",
+      port: process.env.DB_PORT || 5433,
+      username: process.env.DB_USERNAME || "todo_user",
+      password: process.env.DB_PASSWORD || "todo_pass",
+      database: process.env.DB_NAME || "todo_db",
+      //! ⚠️ Automatically disables synchronize in production
+      synchronize: process.env.NODE_ENV !== "production",
     },
   },
 });
