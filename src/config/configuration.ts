@@ -12,7 +12,7 @@ export default () => ({
     postgres: {
       type: "postgres" as const,
       host: process.env.DB_HOST || "localhost",
-      port: process.env.DB_PORT || 5433,
+      port: process.env.DB_PORT || 5432,
       username: process.env.DB_USERNAME || "todo_user",
       password: process.env.DB_PASSWORD || "todo_pass",
       database: process.env.DB_NAME || "todo_db",

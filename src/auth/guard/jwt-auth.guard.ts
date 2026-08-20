@@ -41,10 +41,10 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     try {
-      const secretKey = this.configService.get<string>("SECRET_KEY");
+      const secretKey = this.configService.get<string>("JWT_SECRET");
 
       if (!secretKey) {
-        throw new Error("SECRET_KEY is not configured");
+        throw new Error("JWT_SECRET is not configured");
       }
 
       const payload = jwt.verify(token, secretKey);

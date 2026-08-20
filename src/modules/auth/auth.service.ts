@@ -63,7 +63,7 @@ export class AuthService {
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) throw new ForbiddenException("Invalid password");
 
-    const secretkey = this.configService.get<string>("SECRET_KEY");
+    const secretkey = this.configService.get<string>("JWT_SECRET");
 
     //! 1. Create access token
     const accessToken = jwt.sign(
@@ -113,7 +113,7 @@ export class AuthService {
   async verify(verifyDto: VerifyDto) {
     try {
       if (!verifyDto.token) throw new ForbiddenException("Ivalid Token");
-      const secretkey = this.configService.get<string>("SECRET_KEY");
+      const secretkey = this.configService.get<string>("JWT_SECRET");
       const payload = jwt.verify(verifyDto.token, secretkey!) as {
         email: string;
       };
@@ -135,7 +135,7 @@ export class AuthService {
 
   async refresh(refreshToken: string) {
     try {
-      const secretkey = this.configService.get<string>("SECRET_KEY");
+      const secretkey = this.configService.get<string>("JWT_SECRET");
 
       const payload = jwt.verify(refreshToken, secretkey!) as {
         sub: string;
