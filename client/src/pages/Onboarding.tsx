@@ -1,5 +1,5 @@
-import { Link } from 'react-router'
-import Navbar from '../components/Navbar'
+import { Link } from 'react-router';
+import Navbar from '../components/Navbar';
 
 function Onboarding() {
   return (
@@ -14,8 +14,8 @@ function Onboarding() {
           <p className="mt-4 leading-7 text-slate-600">
             Your workspace is ready. Head to your todo list to see what needs your attention.
           </p>
-          <Link className="mt-8 inline-flex rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-white transition hover:bg-secondary" to="/todos">
-            Go to my todos
+          <Link className="mt-8 inline-flex rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-white transition hover:bg-secondary" to="/home">
+            Next
           </Link>
         </section>
       </main>

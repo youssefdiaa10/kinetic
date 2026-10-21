@@ -12,11 +12,11 @@ function Navbar() {
         aria-label="Main navigation"
         className="mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-4 sm:px-10"
       >
-        <Link className="text-xl font-bold tracking-tight text-primary" to="/">
+        <Link className="text-xl font-bold tracking-tight text-primary" to="/home">
           Kinetic
         </Link>
         <div className="flex items-center gap-1">
-          <NavLink className={linkClass} end to="/">Home</NavLink>
+          <NavLink className={linkClass} end to="/home">Home</NavLink>
           <NavLink className={linkClass} to="/todos">Todos</NavLink>
         </div>
       </nav>

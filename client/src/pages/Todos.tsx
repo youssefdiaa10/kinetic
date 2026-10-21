@@ -1,5 +1,5 @@
-import Navbar from '../components/Navbar'
-import Todolist from '../components/Todolist'
+import Navbar from '../components/Navbar';
+import Todolist from '../components/Todolist';
 
 function Todos() {
   return (

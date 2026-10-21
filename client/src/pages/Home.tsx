@@ -20,7 +20,7 @@ function Home() {
             <Link className="rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-white transition hover:bg-secondary" to="/todos">
               View your todos
             </Link>
-            <Link className="rounded-lg border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100" to="/onboarding">
+            <Link className="rounded-lg border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100" to="/todos">
               Get started
             </Link>
           </div>
