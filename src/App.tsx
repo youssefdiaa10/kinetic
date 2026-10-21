@@ -5,7 +5,7 @@ function HomePage() {
     <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-6 py-12 sm:px-10">
       <header className="mb-16 flex items-center justify-between">
         <Link className="text-xl font-bold tracking-tight text-slate-900" to="/">
-          todolist_v4_ui
+          Kinetic
         </Link>
         <nav aria-label="Main navigation" className="flex gap-6 text-sm font-medium text-slate-600">
           <Link className="transition hover:text-slate-950" to="/">Home</Link>
