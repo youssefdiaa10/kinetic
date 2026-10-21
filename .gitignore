@@ -1,24 +1,57 @@
-# Logs
-logs
+# Dependencies
+node_modules/
+
+# Production and build output
+dist/
+dist-ssr/
+build/
+out/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+.secrets/
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Logs and diagnostic output
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
-node_modules
-dist
-dist-ssr
+# Tool caches and generated test output
+.cache/
+.vite/
+.turbo/
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+
+# Local-only configuration
 *.local
+.vercel/
 
-# Editor directories and files
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editors and IDEs
+.idea/
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+*~

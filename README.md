@@ -24,8 +24,10 @@ Use `npm run build` to create a production build and `npm run preview` to serve 
 ```text
 src/
   app/                 Redux store and typed hooks
+  components/          Shared navigation and todo components
   features/todos/      RTK Query API and todo types
-  App.tsx              Application routes
+  pages/               Home, onboarding, todos, and not-found pages
+  App.tsx              Application route configuration
   index.css            Tailwind import and global styles
   main.tsx             React, Redux, and router providers
 ```
