@@ -7,7 +7,7 @@ export default () => ({
       type: "better-sqlite3",
       database: process.env.DB_PATH || "database/db.sqlite",
       //! ⚠️ Automatically disables synchronize in production
-      synchronize: process.env.NODE_ENV !== "production",
+      synchronize: process.env.NODE_ENV !== "development",
     },
     postgres: {
       type: "postgres" as const,
@@ -17,7 +17,7 @@ export default () => ({
       password: process.env.DB_PASSWORD || "todo_pass",
       database: process.env.DB_NAME || "todo_db",
       //! ⚠️ Automatically disables synchronize in production
-      synchronize: process.env.NODE_ENV !== "production",
+      synchronize: process.env.NODE_ENV !== "development",
     },
   },
 });

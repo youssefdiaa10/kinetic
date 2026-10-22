@@ -1,4 +1,4 @@
-import type { Todo } from "./types";
+import type { ITodo } from "./types";
 
 export const TODO_DEFAULTS = {
   status: "NEEDS_ACTION",
@@ -10,9 +10,10 @@ export const TODO_STATUSES = [
   "IN_PROGRESS",
   "ACCOMPLISHED",
 ] as const;
+
 export const TODO_PRIORITIES = ["LOW", "MEDIUM", "HIGH"] as const;
 
-export const TODOS: Todo[] = [
+export const TODOS: ITodo[] = [
   {
     id: "todo-1",
     title: "Review project requirements",

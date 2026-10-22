@@ -67,7 +67,7 @@ function AuthPage({ mode }: AuthPageProps) {
               <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#727786]">Full name</span>
               <input
                 autoComplete="name"
-                className="mt-2 w-full border-0 border-b border-[#e4e6ec] bg-transparent px-0 py-2.5 text-sm text-[#252936] outline-none placeholder:text-[#b4b8c2] focus:border-[#3546A5] focus:ring-0"
+                className="mt-2 w-full border-0 border-b border-[#e4e6ec] bg-transparent px-0 py-2.5 text-sm text-[#252936] outline-none placeholder:text-[#b4b8c2] focus:border-primary focus:ring-0"
                 name="fullName"
                 placeholder="E.g., Julian Thorne"
                 required
@@ -79,7 +79,7 @@ function AuthPage({ mode }: AuthPageProps) {
             <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#727786]">Email address</span>
             <input
               autoComplete="email"
-              className="mt-2 w-full border-0 border-b border-[#e4e6ec] bg-transparent px-0 py-2.5 text-sm text-[#252936] outline-none placeholder:text-[#b4b8c2] focus:border-[#3546A5] focus:ring-0"
+              className="mt-2 w-full border-0 border-b border-[#e4e6ec] bg-transparent px-0 py-2.5 text-sm text-[#252936] outline-none placeholder:text-[#b4b8c2] focus:border-primary focus:ring-0"
               name="email"
               placeholder="julian@workspace.com"
               required
@@ -92,7 +92,7 @@ function AuthPage({ mode }: AuthPageProps) {
               <span>Password</span>
               {isSignup && <span className="normal-case tracking-normal text-[#9297a3]">8+ chars, uppercase, number & symbol</span>}
             </span>
-            <span className="mt-2 flex items-center border-b border-[#e4e6ec] focus-within:border-[#3546A5]">
+            <span className="mt-2 flex items-center border-b border-[#e4e6ec] focus-within:border-primary">
               <input
                 autoComplete={isSignup ? 'new-password' : 'current-password'}
                 className="min-w-0 flex-1 border-0 bg-transparent px-0 py-2.5 text-sm text-[#252936] outline-none placeholder:text-[#b4b8c2] focus:ring-0"
@@ -106,7 +106,7 @@ function AuthPage({ mode }: AuthPageProps) {
               />
               <button
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
-                className="rounded p-1 text-[#858a97] hover:text-[#3546A5] focus-visible:outline-2 focus-visible:outline-[#3546A5]"
+                className="rounded p-1 text-[#858a97] hover:text-primary focus-visible:outline-2 focus-visible:outline-primary"
                 onClick={() => setShowPassword((visible) => !visible)}
                 type="button"
               >
