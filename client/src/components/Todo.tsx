@@ -6,15 +6,15 @@ interface TodoProps {
 
 function Todo({ todo }: TodoProps) {
   return (
-    <li className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
+    <li className="flex items-center gap-3 rounded-xl border border-secondary bg-neutral px-4 py-3">
       <input
         aria-label={`${todo.completed ? 'Completed' : 'Incomplete'}: ${todo.title}`}
         checked={todo.completed}
-        className="size-4 accent-indigo-600"
+        className="size-4 accent-[#706AD4]"
         readOnly
         type="checkbox"
       />s
-      <span className={todo.completed ? 'text-slate-400 line-through' : 'text-slate-800'}>
+      <span className={todo.completed ? 'text-tertiary line-through' : 'text-primary'}>
         {todo.title}
       </span>
     </li>

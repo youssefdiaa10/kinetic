@@ -5,7 +5,7 @@ function Todolist() {
   const { data: todos, isLoading, isError } = useGetTodosQuery()
 
   if (isLoading) {
-    return <p className="text-sm text-slate-500" role="status">Loading your todos…</p>
+    return <p className="text-sm text-secondary" role="status">Loading your todos…</p>
   }
 
   if (isError) {
@@ -18,9 +18,9 @@ function Todolist() {
 
   if (!todos?.length) {
     return (
-      <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center">
-        <p className="font-semibold text-slate-800">Your list is clear.</p>
-        <p className="mt-1 text-sm text-slate-500">When you have todos, they’ll show up here.</p>
+      <div className="rounded-2xl border border-dashed border-tertiary bg-neutral p-8 text-center">
+        <p className="font-semibold text-primary">Your list is clear.</p>
+        <p className="mt-1 text-sm text-secondary">When you have todos, they’ll show up here.</p>
       </div>
     )
   }
