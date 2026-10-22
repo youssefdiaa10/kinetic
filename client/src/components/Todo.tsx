@@ -145,7 +145,7 @@ function Todo({ todo, onToggle, onUpdate, onDelete }: TodoProps) {
                   {todo.priority.charAt(0) + todo.priority.slice(1).toLowerCase()} priority
                 </span>
               </div>
-              {todo.description && <p className="mt-5 mb-2 italic text-sm text-secondary">{todo.description}</p>}
+              {todo.description && <p className="mt-5 mb-1 italic text-sm text-secondary">{todo.description}</p>}
             </div>
 
             <div className="mt-auto flex justify-end gap-2 pt-3">
