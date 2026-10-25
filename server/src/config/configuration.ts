@@ -18,7 +18,7 @@ export default () => ({
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME || "kinetic",
 
-      // Opt in only when a single development instance must create or update the schema.
+      //! Opt in only when a single development instance must create or update the schema.
       synchronize: process.env.DB_SYNCHRONIZE === "true",
     },
   },
