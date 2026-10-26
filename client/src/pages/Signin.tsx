@@ -65,7 +65,7 @@ function Signin() {
         Welcome back
       </p>
 
-      <section className="my-auto w-full max-w-[440px] rounded-[26px] border border-white/80 bg-white/90 px-7 py-8 shadow-[0_18px_50px_rgba(30,35,60,0.08)] sm:px-10 sm:py-10">
+      <section className="my-auto w-full max-w-110 rounded-[26px] border border-white/80 bg-white/90 px-7 py-8 shadow-[0_18px_50px_rgba(30,35,60,0.08)] sm:px-10 sm:py-10">
         <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             <Controller
             name="email"
