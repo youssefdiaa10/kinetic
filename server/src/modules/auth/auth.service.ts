@@ -72,7 +72,7 @@ export class AuthService {
         email: user.email,
       },
       secretkey!,
-      { expiresIn: "1h" },
+      { expiresIn: "30d" },
     );
 
     //! 2. Create empty RefreshToken record
@@ -173,7 +173,7 @@ export class AuthService {
           email: refreshTokenEntity.user.email,
         },
         secretkey!,
-        { expiresIn: "1h" },
+        { expiresIn: "30d" },
       );
 
       return {

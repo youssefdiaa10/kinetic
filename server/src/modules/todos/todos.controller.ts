@@ -7,13 +7,14 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from "@nestjs/common";
 import { JwtAuthGuard } from "../../auth/guard/jwt-auth.guard";
 import {
   CreateTodosDto,
   DeleteTodosDto,
-  FindAllTodosDto,
+  FindAllTodosByUserIdDto,
   UpdateTodosDto,
 } from "../../dtos/todos/todos.dto";
 import { TodosService } from "./todos.service";
@@ -24,12 +25,14 @@ export class TodosController {
   constructor(private readonly todosService: TodosService) {}
 
   @Get("/all")
-  findAll(@Body() findAllTodosDto: FindAllTodosDto) {
-    return this.todosService.findAll(findAllTodosDto);
+  findAllTodosByUserId(
+    @Query() findAllTodosByUserIdDto: FindAllTodosByUserIdDto,
+  ) {
+    return this.todosService.findAllTodosByUserId(findAllTodosByUserIdDto);
   }
 
   @Get("/one")
-  findOne(@Body() id: string) {
+  findOne(@Query("id", ParseUUIDPipe) id: string) {
     return this.todosService.findOne(id);
   }
 

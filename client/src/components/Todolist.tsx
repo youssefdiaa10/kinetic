@@ -1,58 +1,117 @@
+import { skipToken } from '@reduxjs/toolkit/query';
 import { Plus, X } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
-import { TODOS, TODO_DEFAULTS, TODO_PRIORITIES, TODO_STATUSES } from '../utils/constants';
+import { useAppSelector, useToast } from '../app/hooks';
+import {
+    useCreateTodoMutation,
+    useDeleteTodoMutation,
+    useGetTodosQuery,
+    useUpdateTodoMutation,
+} from '../features/todos/todosApi';
+import { TODO_DEFAULTS, TODO_PRIORITIES, TODO_STATUSES } from '../utils/constants';
 import type { ITodo, TodoPriority, TodoStatus } from '../utils/types';
 import Todo from './Todo';
 
 function Todolist() {
-  const [todos, setTodos] = useState(TODOS);
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<TodoPriority>(TODO_DEFAULTS.priority);
   const [status, setStatus] = useState<TodoStatus>(TODO_DEFAULTS.status);
+  const toast = useToast();
+  const userId =
+    useAppSelector((state) => state.todos.userId) ??
+    localStorage.getItem('userId');
+  const {
+    data: todos = [],
+    error: todosError,
+    isLoading: isLoadingTodos,
+    refetch: refetchTodos,
+  } = useGetTodosQuery(userId ?? skipToken);
+  const [createTodo, { isLoading: isCreatingTodo }] = useCreateTodoMutation();
+  const [updateTodo, { isLoading: isUpdatingTodo }] = useUpdateTodoMutation();
+  const [deleteTodo, { isLoading: isDeletingTodo }] = useDeleteTodoMutation();
 
-  const toggleTodo = (id: string, completed: boolean) => {
-    setTodos((currentTodos) =>
-      currentTodos.map((todo) =>
-        todo.id === id
-          ? { ...todo, status: completed ? 'ACCOMPLISHED' : 'NEEDS_ACTION' }
-          : todo,
-      ),
-    );
+  const showRequestError = (error: unknown, fallback: string) => {
+    if (
+      typeof error === 'object' &&
+      error !== null &&
+      'data' in error &&
+      typeof error.data === 'object' &&
+      error.data !== null &&
+      'message' in error.data &&
+      typeof error.data.message === 'string'
+    ) {
+      toast.error(error.data.message);
+      return;
+    }
+
+    toast.error(fallback);
   };
 
-  const updateTodo = (
+  const handleUpdateTodo = async (
     id: string,
-    updates: Pick<ITodo, 'title' | 'description' | 'status' | 'priority'>,
-  ) => {
-    setTodos((currentTodos) =>
-      currentTodos.map((todo) => (todo.id === id ? { ...todo, ...updates } : todo)),
-    );
+    updates: Partial<Pick<ITodo, 'title' | 'description' | 'status' | 'priority'>>,
+  ): Promise<boolean> => {
+    try {
+      await updateTodo({ id, changes: updates }).unwrap();
+      toast.success('Todo updated.');
+      return true;
+    } catch (error) {
+      showRequestError(error, 'Could not update this todo.');
+      return false;
+    }
   };
 
-  const deleteTodo = (id: string) => {
-    setTodos((currentTodos) => currentTodos.filter((todo) => todo.id !== id));
+  const handleToggleTodo = async (id: string, completed: boolean) => {
+    await handleUpdateTodo(id, {
+      status: completed ? 'ACCOMPLISHED' : 'NEEDS_ACTION',
+    });
   };
 
-  const createTodo = (event: FormEvent<HTMLFormElement>) => {
+  const handleDeleteTodo = async (id: string) => {
+    try {
+      await deleteTodo(id).unwrap();
+      toast.success('Todo deleted.');
+    } catch (error) {
+      showRequestError(error, 'Could not delete this todo.');
+    }
+  };
+
+  const handleCreateTodo = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const newTodo: ITodo = {
-      id: crypto.randomUUID(),
-      title: title.trim(),
-      description: description.trim() || undefined,
-      status,
-      priority,
-    };
+    if (!userId) {
+      toast.error('Please sign in again before creating a todo.');
+      return;
+    }
 
-    setTodos((currentTodos) => [newTodo, ...currentTodos]);
-    setTitle('');
-    setDescription('');
-    setPriority(TODO_DEFAULTS.priority);
-    setStatus(TODO_DEFAULTS.status);
-    setIsCreateFormOpen(false);
+    try {
+      await createTodo({
+        title: title.trim(),
+        description: description.trim() || undefined,
+        status,
+        priority,
+        userId,
+      }).unwrap();
+      setTitle('');
+      setDescription('');
+      setPriority(TODO_DEFAULTS.priority);
+      setStatus(TODO_DEFAULTS.status);
+      setIsCreateFormOpen(false);
+      toast.success('Todo created.');
+    } catch (error) {
+      showRequestError(error, 'Could not create this todo.');
+    }
   };
+
+  if (!userId) {
+    return (
+      <p className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700" role="alert">
+        Your account could not be identified. Please sign in again to view your todos.
+      </p>
+    );
+  }
 
   return (
     <div>
@@ -68,7 +127,7 @@ function Todolist() {
       </div>
 
       {isCreateFormOpen && (
-        <form className="mb-6 grid gap-4 rounded-2xl border border-secondary bg-neutral p-5 shadow-sm sm:grid-cols-2" onSubmit={createTodo}>
+        <form className="mb-6 grid gap-4 rounded-2xl border border-secondary bg-neutral p-5 shadow-sm sm:grid-cols-2" onSubmit={handleCreateTodo}>
           <div className="sm:col-span-2">
             <label className="mb-1 block text-sm font-medium text-primary" htmlFor="todo-title">Title</label>
             <input
@@ -121,24 +180,41 @@ function Todolist() {
             </select>
           </div>
           <div className="flex justify-end sm:col-span-2">
-            <button className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-neutral transition-colors hover:bg-secondary" type="submit">
-              Add todo
+            <button className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-neutral transition-colors hover:bg-secondary disabled:cursor-wait disabled:opacity-60" disabled={isCreatingTodo} type="submit">
+              {isCreatingTodo ? 'Adding...' : 'Add todo'}
             </button>
           </div>
         </form>
       )}
 
-      <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
-        {todos.map((todo) => (
-          <Todo
-            key={todo.id}
-            todo={todo}
-            onToggle={(completed) => toggleTodo(todo.id, completed)}
-            onUpdate={(updates) => updateTodo(todo.id, updates)}
-            onDelete={() => deleteTodo(todo.id)}
-          />
-        ))}
-      </ul>
+      {isLoadingTodos ? (
+        <p aria-live="polite" className="py-8 text-center text-secondary">Loading todos...</p>
+      ) : todosError ? (
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700" role="alert">
+          <p>Could not load your todos. Check your connection and try again.</p>
+          <button className="mt-2 font-semibold underline" onClick={() => refetchTodos()} type="button">
+            Retry
+          </button>
+        </div>
+      ) : todos.length === 0 ? (
+        <p className="rounded-lg border border-secondary bg-neutral p-6 text-center text-secondary">
+          You don’t have any todos yet. Create one to get started.
+        </p>
+      ) : (
+        <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          {todos.map((todo) => (
+            <Todo
+              key={todo.id}
+              todo={todo}
+              isUpdating={isUpdatingTodo}
+              isDeleting={isDeletingTodo}
+              onToggle={(completed) => handleToggleTodo(todo.id, completed)}
+              onUpdate={(updates) => handleUpdateTodo(todo.id, updates)}
+              onDelete={() => handleDeleteTodo(todo.id)}
+            />
+          ))}
+        </ul>
+      )}
     </div>
   )
 }

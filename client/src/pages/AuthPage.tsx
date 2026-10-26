@@ -1,11 +1,16 @@
-import { useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useSigninMutation, useSignupMutation } from '../features/auth/authApi';
 
 type AuthPageProps = {
-  mode: 'signup' | 'login';
+  mode: 'signup' | 'signin';
 };
 
 function AuthPage({ mode }: AuthPageProps) {
+
+  const [signup, { isLoading,  isError, error, data }] = useSignupMutation();
+  const [signin] = useSigninMutation();
+
   const isSignup = mode === 'signup';
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
@@ -13,45 +18,41 @@ function AuthPage({ mode }: AuthPageProps) {
   const [message, setMessage] = useState('');
   const [created, setCreated] = useState(false);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setBusy(true);
-    setMessage('');
 
-    const formData = new FormData(event.currentTarget);
-    const payload = {
-      ...(isSignup ? { username: String(formData.get('fullName')).trim() } : {}),
-      email: String(formData.get('email')).trim(),
-      password: String(formData.get('password')),
-    };
+    const [username, setUsername] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
 
     try {
-      const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-      const response = await fetch(`${apiBaseUrl}/auth/${isSignup ? 'signup' : 'signin'}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      const result = await response.json();
+      const result = await signup({
+        username,
+        email,
+        password
+      }).unwrap()
 
-      if (!response.ok) {
-        throw new Error(Array.isArray(result.message) ? result.message.join(' ') : result.message || 'Please try again.');
-      }
 
-      if (isSignup) {
-        setCreated(true);
-        setMessage('Your account is ready. Log in to continue.');
-      } else {
-        localStorage.setItem('accessToken', result.accessToken);
-        localStorage.setItem('refreshToken', result.refreshToken);
-        navigate('/home');
+        console.log("******")
+        console.log("******")
+        console.log("Response", result.message);
+        console.log("******")
+        console.log("******")
+
+
+      if (!isError) {
+        console.log("******")
+        console.log("******")
+        console.log("Response", result.message);
+        console.log("******")
+        console.log("******")
       }
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Unable to connect. Check that the API is running.');
-    } finally {
-      setBusy(false);
+      console.error("Signup failed:", error);
     }
-  }
+  } 
+
 
   return (
     <main className="auth-background flex min-h-screen flex-col items-center px-5 py-8 text-[#252936] sm:px-8 sm:py-10">
@@ -70,6 +71,9 @@ function AuthPage({ mode }: AuthPageProps) {
                 className="mt-2 w-full border-0 border-b border-[#e4e6ec] bg-transparent px-0 py-2.5 text-sm text-[#252936] outline-none placeholder:text-[#b4b8c2] focus:border-primary focus:ring-0"
                 name="fullName"
                 placeholder="E.g., Julian Thorne"
+                value={username}
+                onChange={(event) => setUsername(event.target.value)}
+                type="text"
                 required
               />
             </label>
@@ -83,6 +87,8 @@ function AuthPage({ mode }: AuthPageProps) {
               name="email"
               placeholder="julian@workspace.com"
               required
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
               type="email"
             />
           </label>
@@ -101,6 +107,8 @@ function AuthPage({ mode }: AuthPageProps) {
                 pattern={isSignup ? '(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{8,}' : undefined}
                 placeholder={isSignup ? 'Create a strong password' : 'Enter your password'}
                 required
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
                 title={isSignup ? 'Use at least 8 characters with uppercase, lowercase, a number, and a symbol.' : undefined}
                 type={showPassword ? 'text' : 'password'}
               />
@@ -133,29 +141,11 @@ function AuthPage({ mode }: AuthPageProps) {
             {message}
           </p>
         )}
-
-        {!created && (
-          <>
-            <div className="my-6 flex items-center gap-3 text-xs text-[#a1a5af]">
-              <span className="h-px flex-1 bg-[#eceef2]" />
-              <span>or continue with</span>
-              <span className="h-px flex-1 bg-[#eceef2]" />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <button className="flex items-center justify-center gap-2 rounded-full border border-[#e7e9ee] px-3 py-2.5 text-sm text-[#555b68] transition-colors duration-200 hover:border-[#c8cce0] hover:bg-[#fafaff]" onClick={() => setMessage('Google sign-up is not connected yet.')} type="button">
-                <span className="text-base font-semibold text-[#4285f4]">G</span> Google
-              </button>
-              <button className="flex items-center justify-center gap-2 rounded-full border border-[#e7e9ee] px-3 py-2.5 text-sm text-[#555b68] transition-colors duration-200 hover:border-[#c8cce0] hover:bg-[#fafaff]" onClick={() => setMessage('Apple sign-up is not connected yet.')} type="button">
-                <span aria-hidden="true" className="text-base">●</span> Apple
-              </button>
-            </div>
-          </>
-        )}
       </section>
 
       <p className="mt-7 text-center text-sm text-[#747987]">
         {isSignup ? 'Already have an account?' : 'New to Kinetic?'}{' '}
-        <Link className="font-semibold text-primary hover:underline" to={isSignup ? '/login' : '/signup'}>
+        <Link className="font-semibold text-primary hover:underline" to={isSignup ? '/signin' : '/signup'}>
           {isSignup ? 'Log in' : 'Create an account'}
         </Link>
       </p>

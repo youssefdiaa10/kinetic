@@ -4,7 +4,7 @@ import { Repository } from "typeorm";
 import {
   CreateTodosDto,
   DeleteTodosDto,
-  FindAllTodosDto,
+  FindAllTodosByUserIdDto,
   UpdateTodosDto,
 } from "../../dtos/todos/todos.dto";
 import { Todos } from "../../entities/todos.entity";
@@ -18,10 +18,10 @@ export class TodosService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
 
-  async findAll(findAllTodosDto: FindAllTodosDto) {
+  async findAllTodosByUserId(findAllTodosByUserIdDto: FindAllTodosByUserIdDto) {
     const user = await this.userRepository.find({
       where: {
-        id: findAllTodosDto.id,
+        id: findAllTodosByUserIdDto.id,
       },
     });
 
@@ -30,7 +30,7 @@ export class TodosService {
     const todos = await this.todosRepository.find({
       where: {
         user: {
-          id: findAllTodosDto.id,
+          id: findAllTodosByUserIdDto.id,
         },
       },
     });

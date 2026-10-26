@@ -1,4 +1,4 @@
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 
 function Home() {
@@ -19,9 +19,6 @@ function Home() {
           <div className="mt-8 flex flex-wrap gap-3">
             <Link className="rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-neutral transition-colors duration-200 hover:bg-secondary" to="/todos">
               View your todos
-            </Link>
-            <Link className="rounded-lg border border-tertiary bg-neutral px-5 py-3 text-sm font-semibold text-tertiary transition-colors duration-200 hover:bg-tertiary hover:text-neutral" to="/signup">
-              Create an account
             </Link>
           </div>
         </section>

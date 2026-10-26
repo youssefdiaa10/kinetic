@@ -1,40 +1,64 @@
 import { Pencil, Save, Trash2, X } from 'lucide-react';
-import { useState, type FormEvent } from 'react';
+import { useState } from 'react';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { useForm, type SubmitHandler } from 'react-hook-form';
+import * as Yup from 'yup';
 import type { ITodo } from '../features/todos/todosApi';
 import { TODO_PRIORITIES, TODO_STATUSES } from '../utils/constants';
 import type { TodoPriority, TodoStatus } from '../utils/types';
+import { todoEditSchema } from '../utils/schema';
+
+type TodoEditValues = Yup.InferType<typeof todoEditSchema>;
 
 interface TodoProps {
   todo: ITodo;
   onToggle: (completed: boolean) => void;
-  onUpdate: (updates: Pick<ITodo, 'title' | 'description' | 'status' | 'priority'>) => void;
+  onUpdate: (updates: Partial<Pick<ITodo, 'title' | 'description' | 'status' | 'priority'>>) => Promise<boolean>;
   onDelete: () => void;
+  isUpdating: boolean;
+  isDeleting: boolean;
 }
 
-function Todo({ todo, onToggle, onUpdate, onDelete }: TodoProps) {
+function Todo({ todo, onToggle, onUpdate, onDelete, isUpdating, isDeleting }: TodoProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [title, setTitle] = useState(todo.title);
-  const [description, setDescription] = useState(todo.description ?? '');
-  const [status, setStatus] = useState<TodoStatus>(todo.status);
-  const [priority, setPriority] = useState<TodoPriority>(todo.priority);
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<TodoEditValues>({
+    defaultValues: {
+      title: todo.title,
+      description: todo.description ?? '',
+      status: todo.status,
+      priority: todo.priority,
+    },
+    resolver: yupResolver(todoEditSchema),
+  });
   const isCompleted = todo.status === 'ACCOMPLISHED'
 
   const startEditing = () => {
-    setTitle(todo.title);
-    setDescription(todo.description ?? '');
-    setStatus(todo.status);
-    setPriority(todo.priority);
+    reset({
+      title: todo.title,
+      description: todo.description ?? '',
+      status: todo.status,
+      priority: todo.priority,
+    });
     setIsEditing(true);
   };
 
-  const saveChanges = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    onUpdate({
-      title: title.trim(),
-      description: description.trim() || undefined,
-      status,
-      priority,
+  const saveChanges: SubmitHandler<TodoEditValues> = async (values) => {
+    const updated = await onUpdate({
+      title: values.title.trim(),
+      description: values.description.trim() || undefined,
+      status: values.status,
+      priority: values.priority,
     });
+    if (updated) setIsEditing(false);
+  };
+
+  const cancelEditing = () => {
+    reset();
     setIsEditing(false);
   };
 
@@ -62,32 +86,30 @@ function Todo({ todo, onToggle, onUpdate, onDelete }: TodoProps) {
         aria-label={`${isCompleted ? 'Completed' : 'Not completed'}: ${todo.title}`}
         checked={isCompleted}
         className="mt-1 size-4 accent-[#706AD4]"
-        disabled={isEditing}
+        disabled={isEditing || isUpdating || isDeleting}
         onChange={(event) => onToggle(event.target.checked)}
         type="checkbox"
       />
       <div className="flex min-w-0 flex-1 flex-col">
         {isEditing ? (
-          <form className="grid gap-3" onSubmit={saveChanges}>
+          <form className="grid gap-3" onSubmit={handleSubmit(saveChanges)}>
             <div>
               <label className="mb-1 block text-xs font-medium text-primary" htmlFor={`edit-title-${todo.id}`}>Title</label>
               <input
                 autoFocus
                 className="w-full rounded-lg border border-secondary bg-neutral px-3 py-2 text-sm text-primary outline-none focus:border-primary"
                 id={`edit-title-${todo.id}`}
-                onChange={(event) => setTitle(event.target.value)}
-                required
-                value={title}
+                {...register('title')}
               />
+              {errors.title && <p className="mt-1 text-xs text-red-600">{errors.title.message}</p>}
             </div>
             <div>
               <label className="mb-1 block text-xs font-medium text-primary" htmlFor={`edit-description-${todo.id}`}>Description</label>
               <textarea
                 className="w-full resize-y rounded-lg border border-secondary bg-neutral px-3 py-2 text-sm text-primary outline-none focus:border-primary"
                 id={`edit-description-${todo.id}`}
-                onChange={(event) => setDescription(event.target.value)}
                 rows={2}
-                value={description}
+                {...register('description')}
               />
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -96,8 +118,7 @@ function Todo({ todo, onToggle, onUpdate, onDelete }: TodoProps) {
                 <select
                   className="w-full rounded-lg border border-secondary bg-neutral px-2 py-2 text-sm text-primary outline-none focus:border-primary"
                   id={`edit-status-${todo.id}`}
-                  onChange={(event) => setStatus(event.target.value as TodoStatus)}
-                  value={status}
+                  {...register('status')}
                 >
                   {TODO_STATUSES.map((todoStatus) => (
                     <option key={todoStatus} value={todoStatus}>
@@ -111,8 +132,7 @@ function Todo({ todo, onToggle, onUpdate, onDelete }: TodoProps) {
                 <select
                   className="w-full rounded-lg border border-secondary bg-neutral px-2 py-2 text-sm text-primary outline-none focus:border-primary"
                   id={`edit-priority-${todo.id}`}
-                  onChange={(event) => setPriority(event.target.value as TodoPriority)}
-                  value={priority}
+                  {...register('priority')}
                 >
                   {TODO_PRIORITIES.map((todoPriority) => (
                     <option key={todoPriority} value={todoPriority}>
@@ -123,11 +143,11 @@ function Todo({ todo, onToggle, onUpdate, onDelete }: TodoProps) {
               </div>
             </div>
             <div className="flex justify-end gap-2">
-              <button className="inline-flex items-center gap-1 rounded-lg border border-secondary px-3 py-2 text-xs font-semibold text-primary hover:bg-secondary hover:text-white" onClick={() => setIsEditing(false)} type="button">
+              <button className="inline-flex items-center gap-1 rounded-lg border border-secondary px-3 py-2 text-xs font-semibold text-primary hover:bg-secondary hover:text-white" onClick={cancelEditing} type="button">
                 <X aria-hidden="true" className="size-3.5" /> Cancel
               </button>
-              <button className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-neutral hover:bg-secondary" type="submit">
-                <Save aria-hidden="true" className="size-3.5" /> Save
+              <button className="inline-flex items-center gap-1 rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-neutral hover:bg-secondary disabled:cursor-wait disabled:opacity-60" disabled={isUpdating} type="submit">
+                <Save aria-hidden="true" className="size-3.5" /> {isUpdating ? 'Saving...' : 'Save'}
               </button>
             </div>
           </form>
@@ -151,7 +171,8 @@ function Todo({ todo, onToggle, onUpdate, onDelete }: TodoProps) {
             <div className="mt-auto flex justify-end gap-2 pt-3">
               <button
                 aria-label={`Update ${todo.title}`}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-secondary px-3 py-2 text-xs font-semibold text-primary transition-all duration-200 hover:-translate-y-0.5 hover:border-primary hover:bg-secondary hover:text-white hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-secondary px-3 py-2 text-xs font-semibold text-primary transition-all duration-200 hover:-translate-y-0.5 hover:border-primary hover:bg-secondary hover:text-white hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-wait disabled:opacity-60"
+                disabled={isUpdating || isDeleting}
                 onClick={startEditing}
                 type="button"
               >
@@ -159,7 +180,8 @@ function Todo({ todo, onToggle, onUpdate, onDelete }: TodoProps) {
               </button>
               <button
                 aria-label={`Delete ${todo.title}`}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-3 py-2 text-xs font-semibold text-red-600 transition-all duration-200 hover:-translate-y-0.5 hover:border-red-300 hover:bg-red-50 hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-3 py-2 text-xs font-semibold text-red-600 transition-all duration-200 hover:-translate-y-0.5 hover:border-red-300 hover:bg-red-50 hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 disabled:cursor-wait disabled:opacity-60"
+                disabled={isDeleting || isUpdating}
                 onClick={onDelete}
                 type="button"
               >

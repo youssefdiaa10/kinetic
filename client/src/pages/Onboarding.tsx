@@ -1,5 +1,5 @@
 import { motion, useReducedMotion } from 'motion/react';
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 
 function Onboarding() {
@@ -63,7 +63,7 @@ function Onboarding() {
               </Link>
             </motion.span>
             <motion.span className="inline-flex" whileHover={prefersReducedMotion ? undefined : { y: -2 }} whileTap={prefersReducedMotion ? undefined : { scale: 0.97 }}>
-              <Link className="inline-flex rounded-lg border border-tertiary px-5 py-3 text-sm font-semibold text-tertiary transition-colors duration-200 hover:bg-tertiary hover:text-neutral" to="/login">
+              <Link className="inline-flex rounded-lg border border-tertiary px-5 py-3 text-sm font-semibold text-tertiary transition-colors duration-200 hover:bg-tertiary hover:text-neutral" to="/signin">
                 Log in
               </Link>
             </motion.span>

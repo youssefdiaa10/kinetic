@@ -1,0 +1,23 @@
+import * as Yup from "yup";
+import { TODO_PRIORITIES, TODO_STATUSES } from "./constants";
+import type { TodoPriority, TodoStatus } from "./types";
+
+export const signinSchema = Yup.object({
+  email: Yup.string().email("Email is Invalid").required("Email Required"),
+  password: Yup.string()
+    .matches(
+      /^[a-zA-Z0-9][a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{8,32}$/,
+    )
+    .required("Password Required"),
+});
+
+export const todoEditSchema = Yup.object({
+  title: Yup.string().trim().required("Title is required."),
+  description: Yup.string().defined(),
+  status: Yup.mixed<TodoStatus>()
+    .oneOf([...TODO_STATUSES])
+    .required(),
+  priority: Yup.mixed<TodoPriority>()
+    .oneOf([...TODO_PRIORITIES])
+    .required(),
+});
