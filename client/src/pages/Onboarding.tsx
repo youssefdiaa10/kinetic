@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 
 function Onboarding() {
   const prefersReducedMotion = useReducedMotion();
+  const accessToken = localStorage.getItem("token")
   const contentVariants = {
     hidden: { opacity: 0, y: prefersReducedMotion ? 0 : 14 },
     visible: { opacity: 1, y: 0 },
@@ -53,10 +54,16 @@ function Onboarding() {
             transition={{ delay: prefersReducedMotion ? 0 : 0.36, duration: 0.4 }}
           >
             <motion.span className="inline-flex" whileHover={prefersReducedMotion ? undefined : { y: -2 }} whileTap={prefersReducedMotion ? undefined : { scale: 0.97 }}>
-              <Link className="inline-flex rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-neutral transition-colors duration-200 hover:bg-secondary" to="/home">
+              <Link className="inline-flex rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-neutral transition-colors duration-200 hover:bg-secondary" to="/main/home">
                 Next
               </Link>
             </motion.span>
+            {
+              accessToken !== null
+              ?
+              ""
+              :
+              <>
             <motion.span className="inline-flex" whileHover={prefersReducedMotion ? undefined : { y: -2 }} whileTap={prefersReducedMotion ? undefined : { scale: 0.97 }}>
               <Link className="inline-flex rounded-lg border border-tertiary px-5 py-3 text-sm font-semibold text-tertiary transition-colors duration-200 hover:bg-tertiary hover:text-neutral" to="/signup">
                 Sign up
@@ -67,6 +74,8 @@ function Onboarding() {
                 Log in
               </Link>
             </motion.span>
+              </>
+            }
           </motion.div>
         </motion.section>
       </main>

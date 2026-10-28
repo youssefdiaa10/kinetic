@@ -17,7 +17,7 @@ function Home() {
             Keep your next steps in one simple place, then focus on one thing at a time.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link className="rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-neutral transition-colors duration-200 hover:bg-secondary" to="/todos">
+            <Link className="rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-neutral transition-colors duration-200 hover:bg-secondary" to="/main/todos">
               View your todos
             </Link>
           </div>

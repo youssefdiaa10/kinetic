@@ -21,6 +21,9 @@ export interface IUser {
   password: string;
 }
 
+export interface ISignup extends Omit<IUser, "id"> {}
+export interface ISignin extends Omit<IUser, "id" | "username"> {}
+
 export interface AuthState {
   email: string | null;
   accessToken: string | null;
