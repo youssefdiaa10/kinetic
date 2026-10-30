@@ -31,3 +31,14 @@ export const todoEditSchema = Yup.object({
     .oneOf([...TODO_PRIORITIES])
     .required(),
 });
+
+export const createTodoSchema = Yup.object({
+  title: Yup.string().trim().required("Title is required."),
+  description: Yup.string().optional(),
+  status: Yup.mixed<TodoStatus>()
+    .oneOf([...TODO_STATUSES])
+    .required(),
+  priority: Yup.mixed<TodoPriority>()
+    .oneOf([...TODO_PRIORITIES])
+    .required(),
+});

@@ -9,6 +9,8 @@ export interface ITodo {
 export type TodoStatus = "NEEDS_ACTION" | "IN_PROGRESS" | "ACCOMPLISHED";
 export type TodoPriority = "LOW" | "MEDIUM" | "HIGH";
 
+export interface ICreateTodo extends Omit<ITodo, "id"> {}
+
 export interface TodosState {
   selectedTodoId: string | null;
   userId: string | null;
