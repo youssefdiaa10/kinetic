@@ -7,11 +7,7 @@ import { useSigninMutation, useVerifyMutation } from "../features/auth/authApi";
 import { setAccessToken, setRefreshToken } from "../features/auth/authSlice";
 import { setUserId } from "../features/todos/todosSlice";
 import { signinSchema } from "../utils/schema";
-
-interface ISignin {
-  email: string;
-  password: string;
-}
+import type { ISignin } from "../utils/types";
 
 function Signin() {
   const toast = useToast();

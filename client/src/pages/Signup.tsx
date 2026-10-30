@@ -5,18 +5,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "../app/hooks";
 import { useSignupMutation } from "../features/auth/authApi";
 import { signupSchema } from "../utils/schema";
-
-interface ISignup {
-  username: string;
-  email: string;
-  password: string;
-}
+import type { ISignup } from "../utils/types";
 
 function Signup() {
   const toast = useToast();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  const [signup, { isSuccess }] = useSignupMutation();
+  const [signup] = useSignupMutation();
 
   const { handleSubmit, control, formState } = useForm<ISignup>({
     defaultValues: {
