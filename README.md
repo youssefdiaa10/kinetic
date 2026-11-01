@@ -1,142 +1,263 @@
-﻿# Kinetic
+# Kinetic
 
-Kinetic is a full-stack todo list application. The repository contains two separate Node.js projects:
+Kinetic is a full-stack productivity app for managing personal tasks with a modern front end and a secure NestJS backend. The repository is organized as a monorepo with two separate Node.js apps:
 
-- `client/` — a React and TypeScript single-page app built with Vite, React Router, Redux Toolkit, and Tailwind CSS.
-- `server/` — a NestJS and TypeScript REST API using TypeORM, PostgreSQL, and JWT-based authentication.
+- `client/` — React + TypeScript single-page app built with Vite
+- `server/` — NestJS + TypeScript REST API backed by PostgreSQL and JWT auth
 
-The client currently provides onboarding, home, and todos screens. The initial route (`/`) displays onboarding; selecting **Next** opens Home (`/home`). The API supports user signup/signin and protected todo and user operations.
+The project covers onboarding, authentication, user management, and a todo workspace, with the UI split into a landing/onboarding flow plus a protected main area for task management.
 
-## Requirements
+## Why this project exists
 
-- Node.js and npm
-- Docker Desktop (optional, for running the included PostgreSQL service)
+Kinetic combines a polished interface with a real backend so users can:
 
-## Install dependencies
+- create an account and sign in securely
+- manage tasks through a protected todo dashboard
+- store data in a relational database
+- access a clean API layer for app logic and future extension
+- run the frontend and backend independently during development
 
-Install each project's dependencies from the repository root:
+## Project overview
 
-```sh
+### Frontend
+
+The client uses:
+
+- React 19
+- Vite
+- TypeScript
+- React Router
+- Redux Toolkit
+- Tailwind CSS
+- Axios
+- Formik / React Hook Form patterns
+- Toast notifications
+
+The app includes:
+
+- onboarding screen at `/`
+- signup page at `/signup`
+- signin page at `/signin`
+- protected home page at `/main/home`
+- protected todo dashboard at `/main/todos`
+
+### Backend
+
+The server uses:
+
+- NestJS 11
+- TypeScript
+- TypeORM
+- PostgreSQL
+- JWT-based authentication with Passport
+- request validation using class-validator / class-transformer
+- CORS enabled for local development
+
+The backend is structured around modules for:
+
+- authentication
+- users
+- todos
+
+## Repository structure
+
+```text
+kinetic/
+├── client/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── utils/
+│   │   ├── App.tsx
+│   │   └── main.tsx
+│   ├── package.json
+│   ├── vite.config.ts
+│   └── tsconfig*.json
+├── server/
+│   ├── src/
+│   │   ├── auth/
+│   │   ├── config/
+│   │   ├── dtos/
+│   │   ├── entities/
+│   │   ├── modules/
+│   │   ├── app.module.ts
+│   │   └── main.ts
+│   ├── test/
+│   ├── docker-compose.yml
+│   ├── package.json
+│   └── tsconfig*.json
+├── Diagram_ Todo list.png
+├── LICENSE
+└── README.md
+```
+
+## Features
+
+- onboarding experience with guided navigation
+- sign up and sign in workflows
+- JWT-based private routes
+- todo CRUD operations
+- user lookup and management endpoints
+- PostgreSQL-backed persistence
+- validation and guarded access for protected endpoints
+- clean separation between frontend app and API service
+
+## Prerequisites
+
+Before running the project locally, install:
+
+- Node.js 18+ or 20+
+- npm
+- Docker Desktop (for the included PostgreSQL container)
+
+## Local setup
+
+From the repo root:
+
+```bash
 npm --prefix client install
 npm --prefix server install
 ```
 
-Or install them separately:
+You can also install individually:
 
-```sh
-cd client
-npm install
-
-cd ../server
-npm install
+```bash
+cd client && npm install
+cd ../server && npm install
 ```
 
-Each project has its own `package.json`, lockfile, and `node_modules` directory.
+## Database setup
 
-## Run locally
+The server includes a Docker Compose file for local PostgreSQL.
 
-### 1. Start PostgreSQL
+From `server/`:
 
-From `server/`, start the database service with Docker Compose:
-
-```sh
+```bash
 docker compose up -d postgres
 ```
 
-The compose file uses these defaults: database `todo_db`, user `todo_user`, password `todo_pass`, and host port `5432`. Override them with environment variables as described below. Keep the database running while using the API.
+Default values used by the compose file and config are:
 
-### 2. Configure and start the API
+- host: `localhost`
+- port: `5434`
+- username: `yosofalwakil`
+- database: `kinetic`
+- password: must be provided in `server/.env`
 
-The API reads environment variables from its process environment. Create `server/.env` (or set these variables in your shell):
+Create a `server/.env` file with values similar to:
 
 ```env
-PORT=3000
-JWT_SECRET=replace-with-a-long-random-secret
+PORT=3001
 DB_HOST=localhost
-DB_PORT=5432
-DB_USERNAME=todo_user
-DB_PASSWORD=todo_pass
-DB_NAME=todo_db
+DB_PORT=5434
+DB_USERNAME=yosofalwakil
+DB_PASSWORD=your_secure_password
+DB_NAME=kinetic
 NODE_ENV=development
+JWT_SECRET=replace_with_a_long_random_secret
 ```
 
-Then run:
+The backend's configuration also includes a SQLite option, but the active app configuration targets PostgreSQL for local development and is intended to be used with Docker-backed Postgres.
 
-```sh
+## Running the app
+
+### 1) Start the backend
+
+```bash
 cd server
 npm run start:dev
 ```
 
-NestJS serves the API on `http://localhost:3000`. TypeORM schema synchronization is enabled outside production by the current configuration. Do not use that setting as a production migration strategy.
+The API listens on:
 
-### 3. Start the web client
+```text
+http://localhost:3001
+```
 
-In another terminal:
+### 2) Start the frontend
 
-```sh
+Open a second terminal and run:
+
+```bash
 cd client
 npm run dev
 ```
 
-Open the local URL printed by Vite (usually `http://localhost:5173`). The client and server run as separate processes; stop each with `Ctrl+C`.
+The frontend development server usually runs at:
+
+```text
+http://localhost:5173
+```
+
+The two apps are separate services and should be started independently.
 
 ## API overview
 
-All routes are served from the API origin, normally `http://localhost:3000`.
+The server exposes routes from the root API origin, typically:
+
+```text
+http://localhost:3001
+```
+
+### Authentication
 
 | Method | Route | Access | Purpose |
 | --- | --- | --- | --- |
-| `POST` | `/auth/signup` | Public | Create a user account |
-| `POST` | `/auth/signin` | Public | Sign in and receive access and refresh tokens |
-| `PATCH` | `/auth/verify` | Public | Verify an access token |
-| `POST` | `/auth/refresh` | Public | Get a new access token using a refresh token |
-| `GET` | `/user/all` | JWT required | List users |
-| `GET` | `/user/one` | JWT required | Find a user using the request body |
-| `GET` | `/todos/all` | JWT required | List todos for the user ID in the request body |
-| `GET` | `/todos/one` | JWT required | Find a todo using the request body |
-| `POST` | `/todos/create` | JWT required | Create a todo |
-| `PATCH` | `/todos/update/:id` | JWT required | Update a todo |
-| `DELETE` | `/todos/delete` | JWT required | Delete a todo using the request body |
+| `POST` | `/auth/signup` | Public | Register a new user |
+| `POST` | `/auth/signin` | Public | Authenticate and receive tokens |
+| `PATCH` | `/auth/verify` | Public | Verify a token |
+| `POST` | `/auth/refresh` | Public | Refresh an access token |
 
-Protected routes require a valid JWT access token. The API applies request validation with a global NestJS validation pipe. See the DTOs in `server/src/dtos/` for request fields and validation rules.
+### Users
+
+| Method | Route | Access | Purpose |
+| --- | --- | --- | --- |
+| `GET` | `/user/all` | JWT required | Retrieve all users |
+| `GET` | `/user/one` | JWT required | Find a specific user |
+
+### Todos
+
+| Method | Route | Access | Purpose |
+| --- | --- | --- | --- |
+| `GET` | `/todos/all` | JWT required | Fetch all todos for a user |
+| `GET` | `/todos/one` | JWT required | Fetch a specific todo |
+| `POST` | `/todos/create` | JWT required | Create a todo |
+| `PATCH` | `/todos/update/:id` | JWT required | Update a specific todo |
+| `DELETE` | `/todos/delete` | JWT required | Delete a todo |
+
+Guarded routes rely on a valid JWT; the API enforces validation globally with `ValidationPipe` and request DTOs under `server/src/dtos/`.
 
 ## Useful commands
 
-Run these from the relevant project directory:
+### Client
 
-| Project | Command | Description |
-| --- | --- | --- |
-| Client | `npm run dev` | Start the Vite development server |
-| Client | `npm run build` | Type-check and build the client |
-| Client | `npm run lint` | Lint client source files |
-| Client | `npm run preview` | Preview the production client build |
-| Server | `npm run start:dev` | Start NestJS in watch mode |
-| Server | `npm run build` | Build the API |
-| Server | `npm run start:prod` | Start the compiled API |
-| Server | `npm test` | Run unit tests |
-| Server | `npm run test:e2e` | Run end-to-end tests |
-| Server | `npm run lint` | Lint and automatically fix server source files |
-
-## Project layout
-
-```text
-client/
-  src/
-    app/          Redux store and hooks
-    components/   Shared UI components
-    features/     Client-side feature/API logic
-    pages/        Onboarding, Home, Todos, and not-found screens
-server/
-  src/
-    auth/         JWT strategy, guard, and decorators
-    config/       Application and database configuration
-    dtos/         Request data transfer objects
-    entities/     TypeORM entities
-    modules/      Auth, user, and todos modules
-  test/           End-to-end tests
-  docker-compose.yml
+```bash
+cd client
+npm run dev
+npm run build
+npm run lint
+npm run preview
 ```
 
-## Current integration note
+### Server
 
-The client todos API helper currently requests `/api/todos`, while the server exposes routes such as `/todos/all` and `/todos/create` directly on port `3000`. The Vite config does not currently define an `/api` proxy, and the client helper does not yet send an authorization token. Connect these pieces before relying on the Todos screen for live, authenticated API data.
+```bash
+cd server
+npm run start:dev
+npm run build
+npm run start:prod
+npm test
+npm run test:e2e
+npm run lint
+```
+
+## Development notes
+
+- The backend uses `synchronize: true` in development mode, which is convenient for local work but is not a production-grade migration strategy.
+- The frontend uses a client-side router and persists auth state via local storage when applicable.
+- CORS is enabled for local development and may need tightening for production deployment.
+- The project is intentionally split into two independently runnable apps, which keeps responsibilities clear but requires both to run for a fully functional experience.
+
+## License
+
+This project is licensed under the MIT License. See `LICENSE` for full details.
